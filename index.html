@@ -1,68 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Simple Chess</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Play Chess vs AI</title>
+
 <style>
 body{
     font-family:Arial,sans-serif;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
+    text-align:center;
     background:#222;
     color:white;
 }
 
-h1{
-    margin:20px;
-}
-
 #board{
     display:grid;
-    grid-template-columns:repeat(8,80px);
-    grid-template-rows:repeat(8,80px);
-    border:4px solid #333;
+    grid-template-columns:repeat(8,70px);
+    width:560px;
+    margin:20px auto;
 }
 
 .square{
-    width:80px;
-    height:80px;
+    width:70px;
+    height:70px;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:50px;
+    font-size:48px;
     cursor:pointer;
 }
 
-.white{
-    background:#f0d9b5;
-}
-
-.black{
-    background:#b58863;
-}
+.light{background:#f0d9b5;}
+.dark{background:#b58863;}
 
 .selected{
     outline:4px solid yellow;
-}
-
-#turn{
-    margin:15px;
-    font-size:24px;
 }
 </style>
 </head>
 <body>
 
-<h1>Chess Game</h1>
-<div id="turn">White's Turn</div>
+<h1>Chess vs AI</h1>
+<p>You play White. AI plays Black.</p>
+
 <div id="board"></div>
 
 <script>
 const board = document.getElementById("board");
-const turnText = document.getElementById("turn");
 
-let turn = "white";
 let selected = null;
 
 const pieces = [
@@ -76,65 +61,106 @@ const pieces = [
 ["♖","♘","♗","♕","♔","♗","♘","♖"]
 ];
 
-function pieceColor(piece){
-    if("♙♖♘♗♕♔".includes(piece)) return "white";
-    if("♟♜♞♝♛♚".includes(piece)) return "black";
-    return null;
-}
-
 function renderBoard(){
-    board.innerHTML = "";
+    board.innerHTML="";
 
-    for(let row=0; row<8; row++){
-        for(let col=0; col<8; col++){
+    for(let r=0;r<8;r++){
+        for(let c=0;c<8;c++){
 
-            const square = document.createElement("div");
-            square.classList.add(
-                "square",
-                (row+col)%2===0 ? "white":"black"
-            );
+            const sq=document.createElement("div");
 
-            square.textContent = pieces[row][col];
+            sq.className=
+                "square "+
+                ((r+c)%2?"dark":"light");
 
-            square.onclick = () => handleClick(row,col,square);
+            sq.textContent=pieces[r][c];
 
-            board.appendChild(square);
+            sq.onclick=()=>clickSquare(r,c);
+
+            board.appendChild(sq);
         }
     }
 }
 
-function handleClick(row,col,square){
+function isWhite(p){
+    return "♙♖♘♗♕♔".includes(p);
+}
 
-    const piece = pieces[row][col];
+function isBlack(p){
+    return "♟♜♞♝♛♚".includes(p);
+}
+
+function clickSquare(r,c){
+
+    const piece=pieces[r][c];
 
     if(selected===null){
 
-        if(piece && pieceColor(piece)===turn){
-            selected={row,col};
-            renderBoard();
-
-            const index=row*8+col;
-            board.children[index].classList.add("selected");
+        if(isWhite(piece)){
+            selected={r,c};
         }
 
     }else{
 
-        const fromPiece =
-            pieces[selected.row][selected.col];
-
-        pieces[row][col]=fromPiece;
-        pieces[selected.row][selected.col]="";
+        pieces[r][c]=pieces[selected.r][selected.c];
+        pieces[selected.r][selected.c]="";
 
         selected=null;
 
-        turn = turn==="white" ? "black":"white";
-
-        turnText.textContent =
-            turn.charAt(0).toUpperCase() +
-            turn.slice(1) + "'s Turn";
-
         renderBoard();
+
+        setTimeout(aiMove,500);
     }
+
+    renderBoard();
+}
+
+function getBlackPieces(){
+
+    const list=[];
+
+    for(let r=0;r<8;r++){
+        for(let c=0;c<8;c++){
+
+            if(isBlack(pieces[r][c])){
+                list.push({r,c});
+            }
+        }
+    }
+
+    return list;
+}
+
+function aiMove(){
+
+    const blacks=getBlackPieces();
+
+    if(blacks.length===0) return;
+
+    const piece=
+        blacks[Math.floor(Math.random()*blacks.length)];
+
+    const dirs=[
+        [1,0],[-1,0],[0,1],[0,-1],
+        [1,1],[1,-1],[-1,1],[-1,-1]
+    ];
+
+    const move=
+        dirs[Math.floor(Math.random()*dirs.length)];
+
+    const nr=piece.r+move[0];
+    const nc=piece.c+move[1];
+
+    if(nr>=0 && nr<8 && nc>=0 && nc<8){
+
+        if(!isBlack(pieces[nr][nc])){
+
+            pieces[nr][nc]=pieces[piece.r][piece.c];
+            pieces[piece.r][piece.c]="";
+        }
+    }
+
+    renderBoard();
 }
 
 renderBoard();
