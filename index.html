@@ -1,285 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>College Website</title>
-
+<title>Simple Chess</title>
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
-}
-
 body{
-    background:#f4f4f4;
-}
-
-/* Header */
-header{
-    background:#fff;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-    padding:15px 30px;
+    font-family:Arial,sans-serif;
     display:flex;
-    justify-content:space-between;
+    flex-direction:column;
     align-items:center;
-}
-
-.logo{
-    display:flex;
-    align-items:center;
-    gap:15px;
-}
-
-.logo img{
-    width:60px;
-}
-
-.logo h2{
-    color:#c00;
-    font-size:22px;
-}
-
-nav ul{
-    list-style:none;
-    display:flex;
-    gap:30px;
-}
-
-nav ul li a{
-    text-decoration:none;
-    color:#d54d4d;
-    font-weight:500;
-}
-
-/* Layout */
-.container{
-    display:flex;
-}
-
-/* Sidebar */
-.sidebar{
-    width:220px;
-    background:#fff;
-    min-height:100vh;
-    border-right:1px solid #ddd;
-}
-
-.sidebar ul{
-    list-style:none;
-}
-
-.sidebar li{
-    padding:18px;
-    border-bottom:1px solid #eee;
-}
-
-.sidebar a{
-    text-decoration:none;
-    color:#d40000;
-    font-size:18px;
-}
-
-/* Main */
-.main{
-    flex:1;
-    padding:30px;
-}
-
-/* Hero */
-.hero{
-    background:white;
-    text-align:center;
-    padding:40px 20px;
-    border-radius:10px;
-}
-
-.hero h1{
-    color:#c40000;
-    font-size:64px;
-    margin-top:10px;
-}
-
-.hero h2{
-    color:#c40000;
-    font-size:38px;
-}
-
-.hero p{
-    margin-top:10px;
-    color:#555;
-    font-weight:bold;
-}
-
-/* Cards */
-.cards{
-    display:flex;
-    gap:25px;
-    margin-top:30px;
-}
-
-.card{
-    background:#f7cf3c;
-    padding:30px;
-    border-radius:10px;
-    box-shadow:0 4px 8px rgba(0,0,0,.1);
-}
-
-.left-card{
-    width:35%;
-    text-align:center;
-}
-
-.left-card h3{
-    color:#004ea8;
-    font-size:36px;
-}
-
-.left-card p{
-    color:#6a0080;
-    font-size:22px;
-    font-weight:bold;
-    margin-top:10px;
-}
-
-.right-card{
-    width:65%;
-    text-align:center;
-}
-
-.right-card h3{
-    color:#d02020;
-    margin-bottom:20px;
-}
-
-.btn{
-    background:#d60000;
+    background:#222;
     color:white;
-    border:none;
-    padding:15px 35px;
-    border-radius:30px;
-    cursor:pointer;
-    font-size:18px;
-    font-weight:bold;
 }
 
-.notice{
-    margin-top:20px;
-    background:#f7cf3c;
-    padding:15px;
-    border-radius:8px;
-    font-weight:bold;
-    color:#b02c2c;
+h1{
+    margin:20px;
 }
 
-/* Why Join */
-.section{
-    margin-top:40px;
-    background:white;
-    border-radius:10px;
-    overflow:hidden;
-}
-
-.section-title{
-    background:#d8c1a8;
-    padding:15px;
-    font-size:36px;
-    font-weight:bold;
-}
-
-.gallery{
+#board{
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(8,80px);
+    grid-template-rows:repeat(8,80px);
+    border:4px solid #333;
 }
 
-.gallery img{
-    width:100%;
-    height:250px;
-    object-fit:cover;
+.square{
+    width:80px;
+    height:80px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:50px;
+    cursor:pointer;
+}
+
+.white{
+    background:#f0d9b5;
+}
+
+.black{
+    background:#b58863;
+}
+
+.selected{
+    outline:4px solid yellow;
+}
+
+#turn{
+    margin:15px;
+    font-size:24px;
 }
 </style>
 </head>
 <body>
 
-<header>
-    <div class="logo">
-        <img src="https://via.placeholder.com/60" alt="">
-        <h2>ADHIPARASAKTHI ENGINEERING COLLEGE</h2>
-    </div>
+<h1>Chess Game</h1>
+<div id="turn">White's Turn</div>
+<div id="board"></div>
 
-    <nav>
-        <ul>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Academics</a></li>
-            <li><a href="#">Admission</a></li>
-            <li><a href="#">UGC</a></li>
-            <li><a href="#">Committees</a></li>
-            <li><a href="#">IQAC</a></li>
-        </ul>
-    </nav>
-</header>
+<script>
+const board = document.getElementById("board");
+const turnText = document.getElementById("turn");
 
-<div class="container">
+let turn = "white";
+let selected = null;
 
-    <aside class="sidebar">
-        <ul>
-            <li><a href="#">Fee Payment</a></li>
-            <li><a href="#">ERP Login</a></li>
-            <li><a href="#">Training & Placement</a></li>
-            <li><a href="#">Facilities</a></li>
-            <li><a href="#">NIRF</a></li>
-        </ul>
-    </aside>
+const pieces = [
+["♜","♞","♝","♛","♚","♝","♞","♜"],
+["♟","♟","♟","♟","♟","♟","♟","♟"],
+["","","","","","","",""],
+["","","","","","","",""],
+["","","","","","","",""],
+["","","","","","","",""],
+["♙","♙","♙","♙","♙","♙","♙","♙"],
+["♖","♘","♗","♕","♔","♗","♘","♖"]
+];
 
-    <main class="main">
+function pieceColor(piece){
+    if("♙♖♘♗♕♔".includes(piece)) return "white";
+    if("♟♜♞♝♛♚".includes(piece)) return "black";
+    return null;
+}
 
-        <div class="hero">
-            <h2>40 YEARS OF EXCELLENCE</h2>
-            <h1>ADHIPARASAKTHI</h1>
-            <h2>ENGINEERING COLLEGE</h2>
-            <p>AFFILIATED TO ANNA UNIVERSITY</p>
-        </div>
+function renderBoard(){
+    board.innerHTML = "";
 
-        <div class="cards">
+    for(let row=0; row<8; row++){
+        for(let col=0; col<8; col++){
 
-            <div class="card left-card">
-                <h3>UGC</h3>
-                <p>CONFERRED AUTONOMOUS STATUS</p>
-                <h4>FOR 10 YEARS</h4>
-            </div>
+            const square = document.createElement("div");
+            square.classList.add(
+                "square",
+                (row+col)%2===0 ? "white":"black"
+            );
 
-            <div style="width:65%;">
-                <div class="card right-card">
-                    <h3>2026 - 2027 Admissions Open</h3>
-                    <button class="btn">Click to Apply</button>
-                    <p style="margin-top:15px;">
-                        For further queries contact:
-                        7418064336, 7418065336
-                    </p>
-                </div>
+            square.textContent = pieces[row][col];
 
-                <div class="notice">
-                    TNEA Counseling Code: 1401
-                </div>
-            </div>
+            square.onclick = () => handleClick(row,col,square);
 
-        </div>
+            board.appendChild(square);
+        }
+    }
+}
 
-        <div class="section">
-            <div class="section-title">Why Join APEC?</div>
+function handleClick(row,col,square){
 
-            <div class="gallery">
-                <img src="https://images.unsplash.com/photo-1562774053-701939374585?w=800" alt="">
-                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800" alt="">
-                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800" alt="">
-            </div>
-        </div>
+    const piece = pieces[row][col];
 
-    </main>
+    if(selected===null){
 
-</div>
+        if(piece && pieceColor(piece)===turn){
+            selected={row,col};
+            renderBoard();
+
+            const index=row*8+col;
+            board.children[index].classList.add("selected");
+        }
+
+    }else{
+
+        const fromPiece =
+            pieces[selected.row][selected.col];
+
+        pieces[row][col]=fromPiece;
+        pieces[selected.row][selected.col]="";
+
+        selected=null;
+
+        turn = turn==="white" ? "black":"white";
+
+        turnText.textContent =
+            turn.charAt(0).toUpperCase() +
+            turn.slice(1) + "'s Turn";
+
+        renderBoard();
+    }
+}
+
+renderBoard();
+</script>
 
 </body>
 </html>
